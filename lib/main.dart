@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:llumin8_bledom_demo/adapter/bledom_adapter.dart';
 import 'package:llumin8_bledom_demo/pages/select_device_page.dart';
 
 void main() {
@@ -25,7 +26,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: "Razza's Trash LED Controller"),
     );
   }
 }
@@ -50,6 +51,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   Color _color = const Color.fromARGB(255, 120, 64, 255);
+  BLEDOMController? _controller;
 
   void _changeRed(double red) {
     setState(() {
@@ -70,13 +72,16 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _commit() {
-    // send the command to the device
+    _controller?.setColor(_color);
   }
 
-  void _changeDevice() {
-    Navigator.push(context, MaterialPageRoute(builder: (ctx) {
-      return SelectDevicePage();
-    }));
+  void _changeDevice() async {
+    final controller = await Navigator.push(
+        context, MaterialPageRoute(builder: (ctx) => SelectDevicePage()));
+
+    setState(() {
+      _controller = controller;
+    });
   }
 
   String _colorToHex(Color c) {
@@ -117,50 +122,60 @@ class _MyHomePageState extends State<MyHomePage> {
           // axis because Columns are vertical (the cross axis would be
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              color: _color,
-              padding: const EdgeInsetsDirectional.only(top: 32, bottom: 32),
-              child: Center(
-                child: Column(
-                  children: [
-                    Text(
-                      _colorToHex(_color),
-                      style: TextStyle(
-                          fontSize: 32,
-                          color: _color.computeLuminance() > 0.45
-                              ? Colors.black
-                              : Colors.white),
-                    )
-                  ],
-                ),
-              ),
-            ),
+          children: _controller == null
+              ? <Widget>[
+                  Container(
+                    child: const Text(
+                        "You need to connect to a device. Tap the button of the bottom of the screen."),
+                    padding: EdgeInsets.all(16),
+                  )
+                ]
+              : <Widget>[
+                  Container(
+                    color: _color,
+                    padding:
+                        const EdgeInsetsDirectional.only(top: 32, bottom: 32),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Text(
+                            _colorToHex(_color),
+                            style: TextStyle(
+                                fontSize: 32,
+                                color: _color.computeLuminance() > 0.45
+                                    ? Colors.black
+                                    : Colors.white),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
 
-            // Colour sliders
-            Slider(
-              value: _color.red.toDouble() / 255,
-              onChanged: _changeRed,
-              activeColor: Colors.red,
-              thumbColor: Colors.redAccent,
-              inactiveColor: Colors.red.shade100,
-            ),
-            Slider(
-              value: _color.green.toDouble() / 255,
-              onChanged: _changeGreen,
-              activeColor: Colors.green,
-              thumbColor: Colors.greenAccent,
-              inactiveColor: Colors.green.shade100,
-            ),
-            Slider(
-              value: _color.blue.toDouble() / 255,
-              onChanged: _changeBlue,
-              activeColor: Colors.blue,
-              thumbColor: Colors.blueAccent,
-              inactiveColor: Colors.blue.shade100,
-            ),
-            ElevatedButton(child: const Text("Set Color"), onPressed: () {})
-          ],
+                  // Colour sliders
+                  Slider(
+                    value: _color.red.toDouble() / 255,
+                    onChanged: _changeRed,
+                    activeColor: Colors.red,
+                    thumbColor: Colors.redAccent,
+                    inactiveColor: Colors.red.shade100,
+                  ),
+                  Slider(
+                    value: _color.green.toDouble() / 255,
+                    onChanged: _changeGreen,
+                    activeColor: Colors.green,
+                    thumbColor: Colors.greenAccent,
+                    inactiveColor: Colors.green.shade100,
+                  ),
+                  Slider(
+                    value: _color.blue.toDouble() / 255,
+                    onChanged: _changeBlue,
+                    activeColor: Colors.blue,
+                    thumbColor: Colors.blueAccent,
+                    inactiveColor: Colors.blue.shade100,
+                  ),
+                  ElevatedButton(
+                      child: const Text("Set Color"), onPressed: _commit)
+                ],
         ),
       ),
       floatingActionButton: FloatingActionButton(

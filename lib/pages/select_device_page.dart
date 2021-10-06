@@ -50,7 +50,7 @@ class _SelectDevicePageState extends State<SelectDevicePage> {
     await led.setColor(const Color.fromARGB(255, 255, 212, 111));
 
     print("Previous page");
-    Navigator.pop(context);
+    Navigator.pop(context, led);
   }
 
   @override
