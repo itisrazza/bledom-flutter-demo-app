@@ -1,12 +1,10 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:llumin8_bledom_demo/adapter/led_adapter.dart';
 
-
 class BLEDOMController extends LEDController {
-  static final Guid bleCharacteristic = Guid("0000fff3-0000-1000-8000-00805f9b34fb");
+  static final Guid bleCharacteristic =
+      Guid("0000fff3-0000-1000-8000-00805f9b34fb");
 
   @override
   String get name => _device.name;
@@ -30,6 +28,10 @@ class BLEDOMController extends LEDController {
   static Future<BLEDOMController> fromDevice(BluetoothDevice device) async {
     BluetoothCharacteristic? targetCharacteristic;
 
+    print("BLEDOM: Connecting to device");
+    await device.connect();
+
+    print("BLEDOM: Discovering services");
     var services = await device.discoverServices();
     for (var service in services) {
       for (var characteristic in service.characteristics) {
@@ -40,18 +42,35 @@ class BLEDOMController extends LEDController {
     }
 
     if (targetCharacteristic == null) {
-      throw UnsupportedError("This device does not advertise BLEDOM characteristic.");
+      throw UnsupportedError(
+          "This device does not advertise BLEDOM characteristic.");
     }
+    print("BLEDOM: Found characteristic");
 
-    return BLEDOMController(device, targetCharacteristic);
+    final bledom = BLEDOMController(device, targetCharacteristic);
+    print("BLEDOM: Powering on");
+    await bledom.powerOn();
+    return bledom;
   }
 
   /// Sends an arbitrary command to the LED controller.
-  Future<void> sendCommand(int id, [int arg0 = 0, int arg1 = 0, int arg2 = 0, int arg3 = 0, int arg4 = 0]) {
-    return _characteristic.write([ 0x7E, 0x00, id, arg0, arg1, arg2, arg3, arg4, 0xEF ]);
+  Future<void> sendCommand(int id,
+      [int arg0 = 0, int arg1 = 0, int arg2 = 0, int arg3 = 0, int arg4 = 0]) {
+    return _characteristic
+        .write([0x7E, 0x00, id, arg0, arg1, arg2, arg3, arg4, 0xEF]);
   }
 
   // basic
+
+  @override
+  Future<void> powerOn() {
+    return sendCommand(0x04, 0xF0, 0x00, 0x01, 0xFF);
+  }
+
+  @override
+  Future<void> powerOff() {
+    return sendCommand(0x04, 0x00, 0x00, 0x00, 0xFF);
+  }
 
   @override
   Future<void> setColor(Color color) {
@@ -67,7 +86,7 @@ class BLEDOMController extends LEDController {
         FadePreset("Cross-fade between black and red", "0x8b"),
         FadePreset("Cross-fade between black and green", "0x8c"),
         FadePreset("Cross-fade between black and blue", "0x8d"),
-        FadePreset("Yeah, uh huh, you know what it is (black and yellow)", "0x8e"),
+        FadePreset("You know what it is (black and yellow)", "0x8e"),
         FadePreset("Cross-fade between black and cyan", "0x8f"),
         FadePreset("Cross-fade between black and magenta", "0x90"),
         FadePreset("Cross-fade between black and white", "0x91"),

@@ -159,7 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
               thumbColor: Colors.blueAccent,
               inactiveColor: Colors.blue.shade100,
             ),
-            ElevatedButton(child: const Text("Change"), onPressed: () {})
+            ElevatedButton(child: const Text("Set Color"), onPressed: () {})
           ],
         ),
       ),
@@ -167,7 +167,7 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: _changeDevice,
         tooltip: 'Increment',
         child: const Icon(Icons.swap_horiz),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
 }

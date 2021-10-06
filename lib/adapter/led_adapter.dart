@@ -14,6 +14,12 @@ abstract class LEDController {
 
   // basic
 
+  /// Powers the LEDs on.
+  Future<void> powerOn();
+
+  /// Powers the LEDs off.
+  Future<void> powerOff();
+
   /// Sets a static color on the LED controller.
   Future<void> setColor(Color color);
 
@@ -56,9 +62,8 @@ class FadePreset {
   // note for the boys: this is a big brain constructor
 
   @override
-  bool operator ==(Object other) => other is FadePreset
-    && name == other.name
-    && id == other.id;
+  bool operator ==(Object other) =>
+      other is FadePreset && name == other.name && id == other.id;
 
   @override
   int get hashCode => name.hashCode << 11 | id.hashCode;
